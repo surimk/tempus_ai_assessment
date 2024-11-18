@@ -25,3 +25,29 @@
 #### Notes:
 ##### ● Ensure that your query handles cases where there may be a single transcript for a given gene.
 ##### ● Ensure that your query handles cases where there may be a null value(s) for transcript_tpm.
+
+#### FULL QUERY (also in `4b.sql`):
+```
+SELECT 
+    t.patient_id,
+    egm.gene_symbol,
+    -- calculate the sum of TPM + 1 (to avoid log of 0) and do log2
+    LOG(SUM(t.transcript_tpm) + 1 ) / LOG(2) AS log2_tpm_plus_1
+FROM 
+    transcripts t
+JOIN 
+    -- join on transcript_code, which is the unique identifier for transcript
+    transcript_gene_map tgm ON t.transcript_code = tgm.transcript_code
+JOIN 
+    -- join on ensemble_gene_id, which links the linked transcript_gene_map to ensembl_gene_map
+    ensembl_gene_map egm ON tgm.ensembl_gene_id = egm.ensembl_gene_id
+WHERE
+    -- handles NULL transcript_tpm values
+    t.transcript_tpm IS NOT NULL
+GROUP BY 
+    t.patient_id, 
+    egm.gene_symbol
+ORDER BY 
+    t.patient_id, 
+    egm.gene_symbol;
+```
