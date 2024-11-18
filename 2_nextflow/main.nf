@@ -5,6 +5,10 @@ params.out_dir = "${params.publish_dir}/${new Date().format('yyyyMMdd_HHmmss')}"
 
 process SLICE {
     publishDir params.out_dir, mode: 'copy' 
+    errorStrategy 'retry'
+    maxRetries 3
+    cpus 1
+    memory { 2.GB * (task.attempt ?: 1) }  // Increase memory by 2GB for each retry (for larger datasets)
 
     input:
     path dataset
@@ -21,7 +25,11 @@ process SLICE {
 
 process REGRESSION {
     publishDir params.out_dir, mode: 'copy'
-    
+    errorStrategy 'retry'
+    maxRetries 3
+    cpus 1
+    memory { 2.GB * (task.attempt ?: 1) } 
+
     input:
     tuple path(sliced_data), val(features), val(target)
     
@@ -36,7 +44,11 @@ process REGRESSION {
 
 process COMBINE {
     publishDir params.out_dir, mode: 'copy'
-    
+    errorStrategy 'retry'
+    maxRetries 3
+    cpus 1
+    memory { 2.GB * (task.attempt ?: 1) } 
+
     input:
     path regression_results
 
