@@ -34,6 +34,23 @@ process REGRESSION {
     """
 }
 
+process COMBINE {
+    publishDir params.out_dir, mode: 'copy'
+    
+    input:
+    path regression_results
+
+    output:
+    path 'combined_results.csv'
+
+    script:
+    """
+    mkdir -p regression_results
+    cp ${regression_results} regression_results/
+    combine.py --input regression_results --output combined_results.csv
+    """
+}
+
 workflow {
     // Slice the dataset based on slice_by parameter and store as channel
     sliced_ch = SLICE(params.dataset, params.slice_by)
@@ -43,4 +60,6 @@ workflow {
                             .map { sliced_data -> tuple(sliced_data, params.features, params.target)}
     // Fit the regression models for each slice in parallel
     REGRESSION(regression_input_ch)
+    // Collect regression process's output paths into a single list to be passed as a single COMBINE process
+    COMBINE(REGRESSION.out.collect())
 }
