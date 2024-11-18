@@ -6,11 +6,13 @@ import os
 
 # Function to slice data by a chosen column
 # Input: input_file (CSV file), slice_by (column to slice by), output_dir (directory to save sliced data)
+# Output: Sliced data for each unique value in the chosen column as a separate CSV file
 def slice_data(input_file, slice_by, output_dir):
     
     df = pd.read_csv(input_file)
     os.makedirs(output_dir, exist_ok=True)
     
+    # Slice data by unique values in the chosen column
     for value in df[slice_by].unique():
         sliced_data = df[df[slice_by] == value]
         output_file = os.path.join(output_dir, f"{value}_data.csv")
