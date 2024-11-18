@@ -17,7 +17,30 @@
 #### Write a SQL query to identify the top 5 genetic variants that are most strongly associated with the disease. The association is measured by the difference in the frequency of the variant between diseased and healthy patients.
 ### Steps:
 #### ● Calculate the frequency of each variant in diseased patients.
+    ```
+    SELECT
+        variant_id,
+        COUNT(*) * 1.0 / (SELECT COUNT(*) FROM patients WHERE disease_status = 'diseased') AS  diseased_frequency
+    FROM
+        patients
+    WHERE
+        disease_status = 'diseased'
+    GROUP BY
+        variant_id
+    ```
+
 #### ● Calculate the frequency of each variant in healthy patients.
+    ```
+    SELECT
+        variant_id,
+        COUNT(*) * 1.0 / (SELECT COUNT(*) FROM patients WHERE disease_status = 'healthy') AS   healthy_frequency
+    FROM
+        patients
+    WHERE
+        disease_status = 'healthy'
+    GROUP BY
+        variant_id
+    ```
 #### ● Compute the absolute difference in frequencies for each variant.
 #### ● Return the top 5 variants with the highest absolute difference in frequencies.
 
