@@ -18,32 +18,55 @@
 ### Steps:
 #### ● Calculate the frequency of each variant in diseased patients.
     ```
-    SELECT
-        variant_id,
-        COUNT(*) * 1.0 / (SELECT COUNT(*) FROM patients WHERE disease_status = 'diseased') AS  diseased_frequency
-    FROM
-        patients
-    WHERE
-        disease_status = 'diseased'
-    GROUP BY
-        variant_id
+    WITH diseased_frequencies AS (
+        SELECT
+            variant_id,
+            COUNT(*) * 1.0 / (SELECT COUNT(*) FROM patients WHERE disease_status = 'diseased') AS   diseased_frequency
+        FROM
+            patients
+        WHERE
+            disease_status = 'diseased'
+        GROUP BY
+            variant_id
+    ),
     ```
 
 #### ● Calculate the frequency of each variant in healthy patients.
     ```
-    SELECT
-        variant_id,
-        COUNT(*) * 1.0 / (SELECT COUNT(*) FROM patients WHERE disease_status = 'healthy') AS   healthy_frequency
-    FROM
-        patients
-    WHERE
-        disease_status = 'healthy'
-    GROUP BY
-        variant_id
+    healthy_frequencies AS (
+        SELECT
+            variant_id,
+            COUNT(*) * 1.0 / (SELECT COUNT(*) FROM patients WHERE disease_status = 'healthy') AS    healthy_frequency
+        FROM
+            patients
+        WHERE
+            disease_status = 'healthy'
+        GROUP BY
+            variant_id
+    )
     ```
 #### ● Compute the absolute difference in frequencies for each variant.
+    ```
+    SELECT
+        df.variant_id,
+        df.diseased_frequency,
+        hf.healthy_frequency,
+        ABS(
+            df.diseased_frequency - hf.healthy_frequency
+        ) AS frequency_difference
+    FROM
+        diseased_frequencies df
+    JOIN
+        healthy_frequencies hf
+    ON
+        df.variant_id = hf.variant_id
+    ```
 #### ● Return the top 5 variants with the highest absolute difference in frequencies.
-
+    ```
+    ORDER BY
+        frequency_difference DESC
+    LIMIT 5
+    ```
 ### Expected Output:
 #### The query should return the following columns:
 ##### ● variant_id: The unique identifier for the genetic variant.
