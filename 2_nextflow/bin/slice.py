@@ -12,6 +12,9 @@ def slice_data(input_file, slice_by, output_dir):
     df = pd.read_csv(input_file)
     os.makedirs(output_dir, exist_ok=True)
     
+    # Drop rows where the 'slice_by' column has null values
+    df = df.dropna(subset=[slice_by])
+
     # Slice data by unique values in the chosen column
     for value in df[slice_by].unique():
         sliced_data = df[df[slice_by] == value]
